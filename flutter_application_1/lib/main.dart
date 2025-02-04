@@ -179,10 +179,7 @@ class FavoritesPage extends StatelessWidget {
               '${appState.favorites.length} favorites :',
               style: style),
         ),
-        for (var pair in appState.favorites)
-          ListTile(
-            title: Text(pair.asLowerCase, style: style),
-          ),
+        for (var pair in appState.favorites) BigCard(pair: pair),
       ],
     );
   }
