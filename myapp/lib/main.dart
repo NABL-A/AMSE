@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html_parser;
-//import 'package:html/dom.dart' as html_dom;
 
 void main() {
   runApp(MyApp());
@@ -41,31 +40,30 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: _pages[_selectedIndex],
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Color.fromARGB(1, 54, 1, 63),
-          items: [
-            BottomNavigationBarItem(
-              backgroundColor: Colors.red,
-              icon: Image.asset('assets/stuff.webp'),
-              label: 'Accueil',
-            ),
-            BottomNavigationBarItem(
-              icon: Image.asset('assets/heart.webp'),
-              label: 'Favoris',
-            ),
-            BottomNavigationBarItem(
-              icon: Image.asset('assets/compass.webp'),
-              label: 'Recherche',
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-        ));
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        items: [
+          BottomNavigationBarItem(
+            icon: Image.asset('assets/stuff.webp'),
+            label: 'Accueil',
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset('assets/heart.webp'),
+            label: 'Favoris',
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset('assets/compass.webp'),
+            label: 'Recherche',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+      ),
+    );
   }
 }
 
@@ -76,44 +74,54 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
+class GalleryItem {
+  final String text;
+  final String url;
+
+  GalleryItem(this.text, this.url);
+}
+
 class _HomePageState extends State<HomePage> {
-  List<String> _titles = [];
+  List<GalleryItem> _items = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    fetchTitles();
+    fetchGalleryItems();
   }
 
-  Future<void> fetchTitles() async {
-    final url = 'https://bindingofisaacrebirth.fandom.com/wiki/Achievements';
+  Future<void> fetchGalleryItems() async {
+    final baseUrl = 'https://bindingofisaacrebirth.fandom.com/fr/wiki';
+    final url = '$baseUrl/Binding_of_Isaac:_Rebirth_Wiki';
     try {
-      // Ajout d'un header User-Agent pour simuler un navigateur
-      final response = await http.get(
-        Uri.parse(url),
-      );
+      final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
         var document = html_parser.parse(response.body);
-        // Utilisation d'un sélecteur qui cible les éléments de titre
-        var titles = document.querySelectorAll('span.mw-headline');
+        var items = document.querySelectorAll('.gallerybox');
 
         setState(() {
-          _titles = titles.map((element) => element.text.trim()).toList();
+          _items = items
+              .map((element) {
+                // Construisez l'URL complète en utilisant le texte de chaque élément
+                String itemUrl =
+                    '$baseUrl/${element.text.trim().replaceAll(' ', '_')}';
+                return GalleryItem(element.text.trim(), itemUrl);
+              })
+              .where((item) => item.text.isNotEmpty)
+              .toList();
           _isLoading = false;
         });
       } else {
         setState(() {
           _isLoading = false;
         });
-        print('Erreur lors du chargement de la page : ${response.statusCode}');
       }
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      print('Erreur : $e');
     }
   }
 
@@ -122,10 +130,33 @@ class _HomePageState extends State<HomePage> {
     return _isLoading
         ? Center(child: CircularProgressIndicator())
         : ListView.builder(
-            itemCount: _titles.length,
+            padding: EdgeInsets.all(10),
+            itemCount: _items.length,
             itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(_titles[index]),
+              return InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DetailPage(item: {
+                        'title': _items[index].text,
+                        'url': _items[index].url,
+                      }),
+                    ),
+                  );
+                },
+                child: Card(
+                  elevation: 3,
+                  margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                  child: Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Text(
+                      _items[index].text,
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
               );
             },
           );
@@ -150,6 +181,85 @@ class SearchPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text('Search Page', style: TextStyle(fontSize: 24)),
+    );
+  }
+}
+
+class DetailPage extends StatefulWidget {
+  final Map<String, String> item;
+
+  const DetailPage({super.key, required this.item});
+
+  @override
+  _DetailPageState createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<DetailPage> {
+  List<String> _paragraphs = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDetailPage();
+  }
+
+  Future<void> fetchDetailPage() async {
+    try {
+      final response = await http.get(Uri.parse(widget.item['url']!));
+
+      if (response.statusCode == 200) {
+        var document = html_parser.parse(response.body);
+
+        var content = document.querySelector('.mw-parser-output');
+        if (content != null) {
+          var paragraphs = content.querySelectorAll('p');
+          setState(() {
+            _paragraphs = paragraphs
+                .map((p) => p.text.trim())
+                .where((text) => text.isNotEmpty)
+                .toList();
+            _isLoading = false;
+          });
+        } else {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.item['title']!)),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              padding: EdgeInsets.all(10),
+              itemCount: _paragraphs.length,
+              itemBuilder: (context, index) {
+                return Card(
+                  margin: EdgeInsets.symmetric(vertical: 5),
+                  child: Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Text(
+                      _paragraphs[index],
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                );
+              },
+            ),
     );
   }
 }
