@@ -13,7 +13,15 @@ git clone https://github.com/NABL-A/AMSE.git
 ```
 
 Pour lancer le projet il faudra adapter les commandes à lancer en fonction de l'interface.
+
 Placer vous dans le fichier que vous avez installé et ouvrez un terminal de commande.
+
+En premier lieu, pour éviter toute erreur de dépendance, lancez la commande suivante permettant d'installer les dépendances :
+
+```sh
+flutter pub get
+```
+
 
 Sous linux et windows, il suffira de lancer la commande suivante : 
 
@@ -27,6 +35,6 @@ Tandis que sur chrome, ce sera cette commande :
 flutter run -d chrome --web-browser-flag "--no-sandbox"
 ```
 
-
+L'application ne fonctionne pas encore sur Android (Work In Progress !)
 
 
