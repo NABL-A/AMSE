@@ -64,6 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
             ),
+            
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -75,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   onChanged: (double value) {
                     setState(() {
                       _rotationX = value;
-                      
+
                     });
                   },
                 ),
