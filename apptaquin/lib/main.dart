@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:math' as math;
 import 'dart:async';
 import 'package:flutter/material.dart';
 
@@ -62,7 +62,7 @@ class HomeScreen extends StatelessWidget {
                     page = PageThree();
                     break;
                   case 3:
-                    page = const PageFour();
+                    page = PageFour();
                     break;
                   case 4:
                     page = const PageFive();
@@ -152,8 +152,8 @@ class PageTwoState extends State<PageTwo> {
                 child: Transform(
                   alignment: Alignment.center, 
                   transform: Matrix4.identity()
-                    ..rotateZ(2 * pi * _rotationZ)
-                    ..rotateX(2 * pi * _rotationX)
+                    ..rotateZ(2 * math.pi * _rotationZ)
+                    ..rotateX(2 * math.pi * _rotationX)
                     ..scale(2 * _scale),
                   child: Transform.flip(
                     flipX: _flip,
@@ -264,7 +264,7 @@ class PageThreeState extends State<PageThree> {
     setState(() {
       _rotationZ = (_rotationZ + 0.01) % 1.0;
       _rotationX = (_rotationX + 0.005) % 1.0;
-      _scale = 1.0 + 0.5 * sin(_ticks * 0.1);
+      _scale = 1.0 + 0.5 * math.sin(_ticks * 0.1);
     });
     _ticks++;
     if (_ticks > 200) {
@@ -294,8 +294,8 @@ class PageThreeState extends State<PageThree> {
                 child: Transform(
                   alignment: Alignment.center,
                   transform: Matrix4.identity()
-                    ..rotateZ(2 * pi * _rotationZ)
-                    ..rotateX(2 * pi * _rotationX)
+                    ..rotateZ(2 * math.pi * _rotationZ)
+                    ..rotateX(2 * math.pi * _rotationX)
                     ..scale(2 * _scale),
                   child: Transform.flip(
                     flipX: _flip,
@@ -377,37 +377,33 @@ class PageThreeState extends State<PageThree> {
 }
 
 
+
 class PageFour extends StatelessWidget {
-  const PageFour({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Page 4'),
+        title: Text('Display a Tile as a Cropped Image'),
+        centerTitle: true,
       ),
-      body: const Center(
-        child: Text(
-          'Contenu de la Page 4',
-          style: TextStyle(fontSize: 24),
-        ),
-      ),
+      body: Center(
+          child: Text('Page 4'),
+    ),
     );
   }
 }
 
 class PageFive extends StatelessWidget {
   const PageFive({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Page 1'),
+        title: const Text('TP2'),
       ),
-      body: const Center(
-        child: Text(
-          'Contenu de la Page 1',
-          style: TextStyle(fontSize: 24),
-        ),
+      body: Center(
+        child: Text('Page 5')
       ),
     );
   }
@@ -415,17 +411,15 @@ class PageFive extends StatelessWidget {
 
 class PageSix extends StatelessWidget {
   const PageSix({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Page 2'),
+        title: const Text('TP2'),
       ),
-      body: const Center(
-        child: Text(
-          'Contenu de la Page 2',
-          style: TextStyle(fontSize: 24),
-        ),
+      body: Center(
+        child: Text('Page 6')
       ),
     );
   }
@@ -433,17 +427,15 @@ class PageSix extends StatelessWidget {
 
 class PageSeven extends StatelessWidget {
   const PageSeven({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Page 3'),
+        title: const Text('TP2'),
       ),
-      body: const Center(
-        child: Text(
-          'Contenu de la Page 3',
-          style: TextStyle(fontSize: 24),
-        ),
+      body: Center(
+        child: Text('Page 7')
       ),
     );
   }
@@ -451,17 +443,15 @@ class PageSeven extends StatelessWidget {
 
 class PageEight extends StatelessWidget {
   const PageEight({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Page 4'),
+        title: const Text('TP2'),
       ),
-      body: const Center(
-        child: Text(
-          'Contenu de la Page 4',
-          style: TextStyle(fontSize: 24),
-        ),
+      body: Center(
+        child: Text('Page 8')
       ),
     );
   }
@@ -469,17 +459,15 @@ class PageEight extends StatelessWidget {
 
 class PageNine extends StatelessWidget {
   const PageNine({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Page 1'),
+        title: const Text('TP2'),
       ),
-      body: const Center(
-        child: Text(
-          'Contenu de la Page 1',
-          style: TextStyle(fontSize: 24),
-        ),
+      body: Center(
+        child: Text('Page 9')
       ),
     );
   }
@@ -487,19 +475,19 @@ class PageNine extends StatelessWidget {
 
 class PageTen extends StatelessWidget {
   const PageTen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Page 2'),
+        title: const Text('TP2'),
       ),
-      body: const Center(
-        child: Text(
-          'Contenu de la Page 2',
-          style: TextStyle(fontSize: 24),
-        ),
+      body: Center(
+        child: Text('Page 10')
       ),
     );
   }
 }
+
+
 
