@@ -387,8 +387,27 @@ class PageFour extends StatelessWidget {
         centerTitle: true,
       ),
       body: Center(
-          child: Text('Page 4'),
-    ),
+          child: Column(children: [
+        SizedBox(
+            width: 150.0,
+            height: 150.0,
+            child: Container(
+                margin: EdgeInsets.all(20.0),
+                child: this.createTileWidgetFrom(tile))),
+        Container(
+            height: 200,
+            child: Image.network('https://picsum.photos/512/1024',
+                fit: BoxFit.cover))
+      ])),
+    );
+  }
+
+  Widget createTileWidgetFrom(Tile tile) {
+    return InkWell(
+      child: tile.croppedImageTile(3),
+      onTap: () {
+        print("tapped on tile");
+      },
     );
   }
 }
@@ -398,12 +417,53 @@ class PageFive extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final List<Color> tileColors = [
+      Colors.pink.shade300,
+      Colors.green.shade300,
+      Colors.teal.shade300,
+      Colors.red.shade400,
+      Colors.lightGreen.shade400,
+      Colors.cyan.shade400,
+      Colors.red.shade600,
+      Colors.lightBlue.shade300,
+      Colors.blueGrey.shade300,
+    ];
+
+    const double tailleTuile = 100;
+    const double espace = 2;
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TP2'),
+        title: const Text('GridView Example'),
       ),
       body: Center(
-        child: Text('Page 5')
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: (tailleTuile * 3) + (espace * 2), 
+          ),
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: espace,
+              mainAxisSpacing: espace,
+              mainAxisExtent: tailleTuile, 
+            ),
+            itemCount: 9,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              return Container(
+                color: tileColors[index],
+                child: Center(
+                  child: Text(
+                    'Tile ${index + 1}',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -490,4 +550,28 @@ class PageTen extends StatelessWidget {
 }
 
 
+class Tile {
+  String imageURL;
+  Alignment alignment;
 
+  Tile({required this.imageURL,required this.alignment});
+
+  Widget croppedImageTile(gridSize) {
+    return FittedBox(
+      fit: BoxFit.fill,
+      child: ClipRect(
+        child: Container(
+          child: Align(
+            alignment: this.alignment,
+            widthFactor: 1/gridSize,
+            heightFactor: 1/gridSize,
+            child: Image.network(this.imageURL),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Tile tile = new Tile(
+    imageURL: 'https://picsum.photos/512/1024', alignment: Alignment(0, 0));
