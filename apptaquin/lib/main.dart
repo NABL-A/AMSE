@@ -428,16 +428,47 @@ class PageFive extends StatelessWidget {
 }
 
 class PageSix extends StatelessWidget {
-  const PageSix({super.key});
+  const PageSix{super.key});
 
   @override
   Widget build(BuildContext context) {
+    final List<Tile> tiles = [
+      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(-1.0, -1.0)),
+      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(0.0, -1.0)),  
+      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(1.0, -1.0)),  
+      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(-1.0, 0.0)),  
+      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(0.0, 0.0)),  
+      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(1.0, 0.0)),  
+      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(-1.0, 1.0)),  
+      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(0.0, 1.0)),  
+      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(1.0, 1.0)),  
+    ];
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TP2'),
+        title: const Text('Page 2'),
       ),
       body: Center(
-        child: Text('Page 6')
+        child: Container(
+          constraints: const BoxConstraints(
+            maxWidth: 330,
+          ),
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 2,
+              mainAxisSpacing: 2,
+              mainAxisExtent: 100,
+            ),
+            itemCount: 9,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(10),
+            itemBuilder: (context, index) {
+              return tiles[index].croppedImageTile(3);
+            },
+          ),
+        ),
       ),
     );
   }
