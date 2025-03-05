@@ -744,17 +744,272 @@ class _PageNineState extends State<PageNine> {
   }
 }
 
-class PageTen extends StatelessWidget {
+class PageTen extends StatefulWidget {
   const PageTen({super.key});
 
   @override
+  State<PageTen> createState() => _PageTenState();
+}
+
+class _PageTenState extends State<PageTen> {
+  int gridSize = 4;
+  int emptyIndex = -1;
+  bool isGameStarted = false;
+  final math.Random random = math.Random();
+  late List<Tile> tiles;
+  List<int> moveHistory = [];
+  int moveCount = 0;
+  bool hasWon = false;
+  late List<Alignment> originalAlignments;
+
+  @override
+  void initState() {
+    super.initState();
+    resetGrid();
+  }
+
+  void resetGrid() {
+    tiles = List<Tile>.generate(gridSize * gridSize, (index) {
+      double x = -1.0 + (2.0 * (index % gridSize)) / (gridSize - 1);
+      double y = -1.0 + (2.0 * (index ~/ gridSize)) / (gridSize - 1);
+      return Tile(
+        imageURL: 'https://picsum.photos/512/1024',
+        alignment: Alignment(x, y),
+      );
+    });
+    originalAlignments = List<Alignment>.from(tiles.map((tile) => tile.alignment));
+    emptyIndex = -1;
+    isGameStarted = false;
+    moveHistory.clear();
+    moveCount = 0;
+    hasWon = false;
+  }
+
+  void startGame() {
+    if (!isGameStarted) {
+      setState(() {
+        isGameStarted = true;
+        generateSolvableShuffle();
+        moveHistory.clear();
+        moveCount = 0;
+        hasWon = false;
+      });
+    }
+  }
+
+  void stopGame() {
+    if (isGameStarted) {
+      setState(() {
+        resetGrid();
+      });
+    }
+  }
+
+  void increaseGridSize() {
+    if (gridSize < 6) {
+      setState(() {
+        gridSize++;
+        resetGrid();
+      });
+    }
+  }
+
+  void decreaseGridSize() {
+    if (gridSize > 2) {
+      setState(() {
+        gridSize--;
+        resetGrid();
+      });
+    }
+  }
+
+  List<int> getAdjacentIndices(int index) {
+    List<int> adjacent = [];
+    int row = index ~/ gridSize;
+    int col = index % gridSize;
+
+    if (row > 0) adjacent.add(index - gridSize);
+    if (row < gridSize - 1) adjacent.add(index + gridSize);
+    if (col > 0) adjacent.add(index - 1);
+    if (col < gridSize - 1) adjacent.add(index + 1);
+
+    return adjacent;
+  }
+
+  void swapTiles(int tappedIndex) {
+    if (isGameStarted && getAdjacentIndices(emptyIndex).contains(tappedIndex) && !hasWon) {
+      setState(() {
+        final Tile temp = tiles[tappedIndex];
+        tiles[tappedIndex] = tiles[emptyIndex];
+        tiles[emptyIndex] = temp;
+        moveHistory.add(emptyIndex);
+        moveCount++;
+        emptyIndex = tappedIndex;
+        checkWin();
+      });
+    }
+  }
+
+  void undoMove() {
+    if (moveHistory.isNotEmpty && isGameStarted && !hasWon) {
+      setState(() {
+        int lastEmptyIndex = moveHistory.removeLast();
+        swapTiles(lastEmptyIndex);
+        moveCount--;
+        checkWin();
+      });
+    }
+  }
+
+ void generateSolvableShuffle() {
+  List<int> positions = List.generate(gridSize * gridSize, (i) => i);
+  positions.shuffle(random);
+
+  int inversions = 0;
+  int blankPos = positions.indexOf(gridSize * gridSize - 1);
+  for (int i = 0; i < positions.length - 1; i++) {
+    for (int j = i + 1; j < positions.length; j++) {
+      if (positions[i] > positions[j] && positions[i] != gridSize * gridSize - 1 && positions[j] != gridSize * gridSize - 1) {
+        inversions++;
+      }
+    }
+  }
+
+  int blankRowFromBottom = (gridSize - 1) - (blankPos ~/ gridSize);
+  bool isSolvable = gridSize % 2 == 0
+      ? (inversions + blankRowFromBottom) % 2 == 1
+      : inversions % 2 == 0;
+
+  if (!isSolvable) {
+    int temp = positions[0];
+    positions[0] = positions[1];
+    positions[1] = temp;
+  }
+
+  emptyIndex = blankPos;
+  tiles = List<Tile>.generate(gridSize * gridSize, (index) {
+    if (index == emptyIndex) return Tile(imageURL: 'https://picsum.photos/512/1024', alignment: Alignment(0, 0));
+    int originalIndex = positions.indexOf(index);
+    double x = -1.0 + (2.0 * (originalIndex % gridSize)) / (gridSize - 1);
+    double y = -1.0 + (2.0 * (originalIndex ~/ gridSize)) / (gridSize - 1);
+    return Tile(
+      imageURL: 'https://picsum.photos/512/1024',
+      alignment: Alignment(x, y),
+    );
+  });
+}
+
+
+  void checkWin() {
+    if (!isGameStarted) return;
+    bool won = true;
+    for (int i = 0; i < gridSize * gridSize; i++) {
+      if (i == emptyIndex) continue;
+      int expectedIndex = i;
+      if (tiles[i].alignment != originalAlignments[expectedIndex]) {
+        won = false;
+        break;
+      }
+    }
+    if (won) {
+      setState(() {
+        hasWon = true;
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Victoire !'),
+            content: const Text('Vous avez reconstruit l\'image !'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  stopGame();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    const double maxWidth = 420.0;
+    const double spacing = 10.0;
+    double tileSize = (maxWidth - (spacing * (gridSize - 1))) / gridSize;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TP2'),
+        title: const Text('Taquin v1'),
       ),
-      body: Center(
-        child: Text('Page 10')
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Déplacements : $moveCount',
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(10),
+            constraints: const BoxConstraints(maxWidth: maxWidth),
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: gridSize,
+                crossAxisSpacing: spacing,
+                mainAxisSpacing: spacing,
+                mainAxisExtent: tileSize,
+              ),
+              itemCount: gridSize * gridSize,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () => swapTiles(index),
+                  child: Container(
+                    width: tileSize,
+                    height: tileSize,
+                    child: index == emptyIndex
+                        ? Container(color: Colors.grey)
+                        : tiles[index].croppedImageTile(gridSize),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: decreaseGridSize,
+                child: const Text('-'),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: startGame,
+                child: const Text('Start'),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: stopGame,
+                child: const Text('Stop'),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: increaseGridSize,
+                child: const Text('+'),
+              ),
+              const SizedBox(width: 20),
+              ElevatedButton(
+                onPressed: undoMove,
+                child: const Text('Undo'),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
