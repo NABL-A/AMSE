@@ -648,17 +648,97 @@ class _PageEightState extends State<PageEight> {
   }
 }
 
-class PageNine extends StatelessWidget {
+class PageNine extends StatefulWidget {
   const PageNine({super.key});
+
+  @override
+  State<PageNine> createState() => _PageNineState();
+}
+
+class _PageNineState extends State<PageNine> {
+  final math.Random random = math.Random();
+  late List<ColorTile> tiles;
+  int emptyIndex = 4; // Position initiale de la tuile vide (index 4 correspond à "Empty 5" dans une grille 4x4)
+
+  @override
+  void initState() {
+    super.initState();
+    tiles = List<ColorTile>.generate(16, (index) {
+      if (index == emptyIndex) return ColorTile(Color(0xFF808080)); // Gris foncé pour la tuile vide
+      return ColorTile(Color(0xFFB0B0B0)); // Gris clair pour les autres tuiles
+    })..shuffle(random); // Mélange aléatoire initial
+  }
+
+  void swapTiles(int tappedIndex) {
+    if ((tappedIndex - emptyIndex).abs() == 1 && // Voisin horizontal
+        (tappedIndex ~/ 4 == emptyIndex ~/ 4) || // Même ligne
+        (tappedIndex - emptyIndex).abs() == 4) { // Voisin vertical
+      setState(() {
+        final ColorTile temp = tiles[tappedIndex];
+        tiles[tappedIndex] = tiles[emptyIndex];
+        tiles[emptyIndex] = temp;
+        emptyIndex = tappedIndex;
+      });
+    }
+  }
+
+  bool isAdjacentToEmpty(int index) {
+    int rowEmpty = emptyIndex ~/ 4; // Ligne de la tuile vide (division entière par 4)
+    int colEmpty = emptyIndex % 4;  // Colonne de la tuile vide (modulo 4)
+    int row = index ~/ 4;          // Ligne de la tuile actuelle
+    int col = index % 4;           // Colonne de la tuile actuelle
+
+    return (row == rowEmpty && (col == colEmpty - 1 || col == colEmpty + 1)) || // Horizontal
+           (col == colEmpty && (row == rowEmpty - 1 || row == rowEmpty + 1));   // Vertical
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TP2'),
+        title: const Text('Page 1'),
       ),
       body: Center(
-        child: Text('Page 9')
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          constraints: const BoxConstraints(maxWidth: 420), // 4 * 100 + 3 * 10
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              mainAxisExtent: 100,
+            ),
+            itemCount: 16,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              Color tileColor;
+              if (index == emptyIndex) {
+                tileColor = Color(0xFF808080); // Gris foncé pour la tuile vide
+              } else if (isAdjacentToEmpty(index)) {
+                tileColor = Colors.red; // Rouge pour les tuiles adjacentes (pouvant bouger)
+              } else {
+                tileColor = Color(0xFFB0B0B0); // Gris clair pour les autres tuiles
+              }
+
+              return GestureDetector(
+                onTap: () => swapTiles(index),
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  color: tileColor,
+                  child: Center(
+                    child: Text(
+                      index == emptyIndex ? 'Empty ${index + 1}' : 'Tile $index',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
