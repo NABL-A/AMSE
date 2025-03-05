@@ -411,37 +411,79 @@ class PageFour extends StatelessWidget {
     );
   }
 }
+
 class PageFive extends StatelessWidget {
   const PageFive({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final List<Color> tileColors = [
+      Colors.pink.shade300,
+      Colors.green.shade300,
+      Colors.teal.shade300,
+      Colors.red.shade400,
+      Colors.lightGreen.shade400,
+      Colors.cyan.shade400,
+      Colors.red.shade600,
+      Colors.lightBlue.shade300,
+      Colors.blueGrey.shade300,
+    ];
+
+    const double tailleTuile = 100;
+    const double espace = 2;
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TP2'),
+        title: const Text('GridView Example'),
       ),
       body: Center(
-        child: Text('Page 5')
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: (tailleTuile * 3) + (espace * 2), 
+          ),
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: espace,
+              mainAxisSpacing: espace,
+              mainAxisExtent: tailleTuile, 
+            ),
+            itemCount: 9,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              return Container(
+                color: tileColors[index],
+                child: Center(
+                  child: Text(
+                    'Tile ${index + 1}',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
 }
 
 class PageSix extends StatelessWidget {
-  const PageSix{super.key});
+  const PageSix({super.key});
 
   @override
   Widget build(BuildContext context) {
     final List<Tile> tiles = [
-      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(-1.0, -1.0)),
+      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(-1.0, -1.0)), 
       Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(0.0, -1.0)),  
       Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(1.0, -1.0)),  
       Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(-1.0, 0.0)),  
-      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(0.0, 0.0)),  
-      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(1.0, 0.0)),  
+      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(0.0, 0.0)),   
+      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(1.0, 0.0)),   
       Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(-1.0, 1.0)),  
-      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(0.0, 1.0)),  
-      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(1.0, 1.0)),  
+      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(0.0, 1.0)),   
+      Tile(imageURL: 'https://picsum.photos/512/1024', alignment: const Alignment(1.0, 1.0)),   
     ];
 
     return Scaffold(
@@ -474,33 +516,133 @@ class PageSix extends StatelessWidget {
   }
 }
 
-class PageSeven extends StatelessWidget {
+class PageSeven extends StatefulWidget {
   const PageSeven({super.key});
 
   @override
+  State<PageSeven> createState() => _PageSevenState();
+}
+
+class _PageSevenState extends State<PageSeven> {
+  double numberTiles = 3; 
+
+  List<Tile> generateTiles(int size) {
+    List<Tile> tiles = [];
+    for (int i = 0; i < size; i++) {
+      for (int j = 0; j < size; j++) {
+        double x = -1.0 + (2.0 * j) / (size - 1);
+        double y = -1.0 + (2.0 * i) / (size - 1);
+        tiles.add(
+          Tile(
+            imageURL: 'https://picsum.photos/512/1024',
+            alignment: Alignment(x, y),
+          ),
+        );
+      }
+    }
+    return tiles;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    int gridSize = numberTiles.round();
+    final List<Tile> tiles = generateTiles(gridSize);
+    
+    const double maxWidth = 330.0; 
+    const double spacing = 2.0;
+    double tileSize = (maxWidth - (spacing * (gridSize - 1))) / gridSize;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TP2'),
+        title: const Text('Page 2'),
       ),
       body: Center(
-        child: Text('Page 7')
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              constraints: const BoxConstraints(
+                maxWidth: maxWidth, 
+              ),
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: gridSize,
+                  crossAxisSpacing: spacing,
+                  mainAxisSpacing: spacing,
+                  mainAxisExtent: tileSize, 
+                ),
+                itemCount: gridSize * gridSize,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(10),
+                itemBuilder: (context, index) {
+                  return tiles[index].croppedImageTile(gridSize);
+                },
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('Size: '),
+                Slider(
+                  value: numberTiles,
+                  min: 3,
+                  max: 6,
+                  divisions: 3,
+                  label: '$gridSize x $gridSize',
+                  onChanged: (value) {
+                    setState(() {
+                      numberTiles = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class PageEight extends StatelessWidget {
+class PageEight extends StatefulWidget {
   const PageEight({super.key});
+
+  @override
+  State<PageEight> createState() => _PageEightState();
+}
+
+class _PageEightState extends State<PageEight> {
+  final math.Random random = math.Random();
+  late List<Widget> tiles;
+
+  @override
+  void initState() {
+    super.initState();
+    tiles = List<Widget>.generate(2, (index) => TileWidget(ColorTile.randomColor(random)));
+  }
+
+  void swapTiles() {
+    setState(() {
+      tiles.insert(1, tiles.removeAt(0));
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TP2'),
+        title: const Text('Page 4'),
       ),
       body: Center(
-        child: Text('Page 8')
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: tiles,
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: swapTiles,
+        child: const Icon(Icons.sentiment_very_satisfied),
       ),
     );
   }
@@ -539,6 +681,11 @@ class PageTen extends StatelessWidget {
 }
 
 
+// ----------------------
+// Définition des tuiles
+// ----------------------
+
+
 class Tile {
   String imageURL;
   Alignment alignment;
@@ -565,3 +712,40 @@ class Tile {
 Tile tile = new Tile(
     imageURL: 'https://picsum.photos/512/1024', alignment: Alignment(0, 0));
 
+class ColorTile {
+  Color color;
+
+  ColorTile(this.color);
+
+  factory ColorTile.randomColor(math.Random random) {
+    return ColorTile(Color.fromARGB(
+      255,
+      random.nextInt(256), 
+      random.nextInt(256),
+      random.nextInt(256),
+    ));
+  }
+}
+
+
+class TileWidget extends StatelessWidget {
+  final ColorTile tile;
+
+  const TileWidget(this.tile, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return coloredBox();
+  }
+
+  Widget coloredBox() {
+    return Container(
+      width: 100, 
+      height: 100,
+      color: tile.color,
+      child: const Padding(
+        padding: EdgeInsets.all(70.0), 
+      ),
+    );
+  }
+}
